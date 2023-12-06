@@ -38,7 +38,7 @@ def day5_part_2():
     previous_map: str = ""
     current_map: str = ""
     maps_and_values: dict[str, set[tuple[int, int]]] = {"seeds": set()}
-    working_set: set[tuple[int, int]] = set()
+    working_list: list[tuple[int, int]] = []
     lines = input_file.readlines()
     lines.append("")
     for line in lines:
@@ -60,49 +60,39 @@ def day5_part_2():
             maps_and_values[current_map] = set()
         elif line == "":
             if current_map != "":
-                for num in working_set:
+                for num in working_list:
                     maps_and_values[current_map].add(num)
-                working_set = set(maps_and_values[current_map])
+                working_list = list(maps_and_values[current_map])
             else:
-                working_set = set(maps_and_values["seeds"])
+                working_list = list(maps_and_values["seeds"])
         else:
             destination_start, source_start, range_len = tuple([int(num) for num in line.split(" ")])
-            for num in list(working_set):
-                if destination_start == 0 and source_start == 528596530 and range_len==524016820:
-                    print(num)
-                    print(source_start)
-                    print(range_len)
-                if num[0] >= source_start and num[0] < source_start + range_len:
-                    overflow: bool = num[0] + num[1] > source_start + range_len
-                    interior_start = num[0] - source_start + destination_start
-                    if not overflow:
-                        maps_and_values[current_map].add((interior_start, num[1]))
-                        working_set.discard(num)
-                    else:
-                        maps_and_values[current_map].add((interior_start, range_len - (interior_start - destination_start)))
-                        new_start = source_start + range_len
-                        new_len = num[0] + num[1] - new_start
-                        working_set.discard(num)
-                        working_set.add((new_start, new_len))
-                elif num[0]+ num[1] >= source_start and num[0]+num[1] < source_start + range_len and num[0] < source_start:
-                    maps_and_values[current_map].add((destination_start, source_start - num[0] + num[1]))
-                    new_start = num[0] 
-                    new_len = source_start - new_start
-                    working_set.discard(num)
-                    working_set.add((new_start, new_len))
-                elif num[0] < source_start and num[0] + num[1] >= source_start + range_len:
+            numbers_to_remove: list[tuple[int, int]] = []
+            temp_list = []
+            while working_list:
+                num = working_list.pop()
+                # no overflow for both front and end
+                if num[0] >= source_start and num[0] + num[1] <= source_start + range_len:
+                    maps_and_values[current_map].add((num[0] - source_start + destination_start, num[1]))
+                # overflow on end
+                elif num[0] >= source_start and num[0] < source_start + range_len and num[0] + num[1] > source_start + range_len:
+                    maps_and_values[current_map].add((num[0] - source_start + destination_start, source_start + range_len - num[0]))
+                    temp_list.append((source_start + range_len, num[0] + num[1] - source_start - range_len))
+                # overflow on front
+                elif num[0] < source_start and num[0] + num[1] > source_start and num[0] + num[1] <= source_start + range_len:
+                    maps_and_values[current_map].add((destination_start, num[0] + num[1] - source_start))
+                    temp_list.append((num[0], source_start - num[0]))
+                # overflow on both front and end
+                elif num[0] < source_start and num[0] + num[1] > source_start + range_len:
                     maps_and_values[current_map].add((destination_start, range_len))
-                    new_start_1 = num[0]
-                    new_len_1 = source_start - new_start_1
-                    new_start_2 = source_start + range_len
-                    new_len_2 = num[1] - new_start_2 + num[0]
-                    working_set.discard(num)
-                    working_set.add((new_start_1, new_len_1))
-                    working_set.add((new_start_2, new_len_2))
+                    temp_list.append((source_start + range_len, num[0] + num[1] - source_start - range_len))
+                    temp_list.append((num[0], source_start - num[0]))
+                else:
+                    temp_list.append(num)
+            working_list = temp_list
     list_of_tuples = list(maps_and_values["humidity-to-location"])
     current_min: int = list_of_tuples[0][0]
     for num in list_of_tuples:
         if num[0] < current_min:
             current_min = num[0]
     print(current_min)
-    #print(maps_and_values["humidity-to-location"])
