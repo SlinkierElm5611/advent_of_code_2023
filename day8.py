@@ -15,7 +15,5 @@ def day8_part_1():
     while current_location != "ZZZ":
         direction: str = instructions[number_of_steps%len(instructions)]
         number_of_steps += 1
-        next_location: str = map[current_location][direction == "R"]
-        instructions = instructions.replace(current_location, next_location, 1)
-        current_location = next_location
+        current_location = map[current_location][direction == "R"]
     print(number_of_steps)
