@@ -6,6 +6,7 @@ from day5 import day5_part_1, day5_part_2
 from day6 import day6_part_1, day6_part_2
 from day7 import day7_part_1, day7_part_2
 from day8 import day8_part_1, day8_part_2
+from day9 import day9_part_1, day9_part_2
 
 if __name__ == "__main__":
-    day8_part_2()
+    day9_part_2()
